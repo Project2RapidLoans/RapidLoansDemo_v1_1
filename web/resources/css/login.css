@@ -1,0 +1,16 @@
+body{
+    background-color: #ECF3FD;
+}
+
+.contenier{
+    width: 350px;
+    margin: auto;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10%;
+}
+
+.ui-state-default .iconlogin{
+    background-image: url(../images/icons/user.png);
+}
+
