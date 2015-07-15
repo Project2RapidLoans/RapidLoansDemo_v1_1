@@ -1,0 +1,75 @@
+<?xml version='1.0' encoding='UTF-8' ?> 
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <h:head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <h:outputStylesheet name="resources/css/default.css"/>
+        <h:outputStylesheet name="resources/css/cssLayout.css"/>
+        <title>RapidLoans</title>
+    </h:head>
+
+    <h:body>
+
+        <div id="top" class="page-header">
+            <ui:insert name="top">
+                <img src="#{loginBean.urlRequest}resources/img/grl.png"></img>
+            </ui:insert>
+        </div>
+
+        <div>
+            <h:form>
+                <p:menubar>
+                    <p:submenu  label="Prestamos">
+                        <p:menuitem value="Registrar" icon="ui-icon-person" url="#{appBean.URL_Menu}prestamo.xhtml" />
+                    </p:submenu>
+
+                    <p:submenu label="Equipos">
+                        <p:menuitem value="Actualizar" icon="ui-icon-arrowreturnthick-1-e" url="#{appBean.URL_Menu}equipo.xhtml"/>
+                    </p:submenu>
+
+                    <p:submenu label="Reportes">
+                        <p:menuitem value="Generar" icon="ui-icon-arrowreturnthick-1-e" url="#{appBean.URL_Menu}reportes.xhtml"/>
+                    </p:submenu>
+
+                    <p:submenu label="Estados de Prestamos">
+                        <p:menuitem value="Ver"  icon="ui-icon-disk" url="#{appBean.URL_Menu}tiempoReal.xhtml"/>
+                    </p:submenu>
+
+                    <f:facet name="options" >
+                        <p:commandButton id="mcal" value="Calendario" type="button" icon="ui-icon-calendar" />
+                        <p:overlayPanel id="imgPanel" for="mcal" showEffect="blind" hideEffect="explode"
+                                        dismissable="false" showCloseIcon="true">
+                            <p:calendar id="inline" mode="inline" />
+                        </p:overlayPanel>
+
+                        <p:commandButton id="dynaButton" value="Usuario" type="button" icon="ui-icon-person" />
+                        <p:tieredMenu overlay="true" trigger="dynaButton" my="left top" at="left bottom" style="width:200px">
+                            <p:menuitem value="Salir" actionListener="#{loginBean.logout(event)}" oncomplete="handleLoginRequest(xhr, status, args)" />
+                        </p:tieredMenu>
+                    </f:facet>
+                </p:menubar>
+            </h:form>
+        </div>
+        <script type="text/javascript">
+            function handleLoginRequest(xhr, status, args) {
+                if (args.loggerOut) {
+                    location.href = args.ruta;
+                }
+            }
+        </script>
+        <div id="content" class="center_content">
+            <ui:insert name="content">Content</ui:insert>
+        </div>
+
+        <div id="bottom">
+            <ui:insert name="bottom">Bottom</ui:insert>
+        </div>
+
+    </h:body>
+
+</html>

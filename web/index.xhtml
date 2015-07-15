@@ -6,7 +6,7 @@
       xmlns:f="http://xmlns.jcp.org/jsf/core">
     <h:head>
         <title>Bienvenido a RapidLoans</title>
-        <link href="resources/css/login.css" rel="stylesheet"/>
+        <link href="#{loginBean.urlRequest}resources/css/login.css" rel="stylesheet"/>
         <script type="text/javascript" src="/resources/js/jquery.js"></script>
     </h:head>
     <h:body>
@@ -16,11 +16,11 @@
                 <p:growl id="growl" showDetail="true" life="3000"/>
                 <p:panel header="Identifiquese">
                     <h:panelGrid columns="2" cellpadding="5">
-                        <h:outputLabel for="username" value="ID:" />
-                        <p:inputText id="username" required="true" value="#{loginBean.usuario.usuario}" label="username" />
+                        <h:outputLabel for="username" value="ID ESPE:" />
+                        <p:inputText id="username" required="true" value="#{loginBean.usuario.idBanner}" label="username"/>
 
-                        <h:outputLabel for="password" value="Cedula:" />
-                        <p:password id="password" required="true" value="#{loginBean.usuario.clave}" label="password" />
+                        <h:outputLabel for="password" value="Password:" />
+                        <p:password id="password" required="true" value="#{loginBean.usuario.cedula}" label="password"/>
 
                         <f:facet name="footer">
                             <p:commandButton id="loginButton" value="Entrar" update="growl" 

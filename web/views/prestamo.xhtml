@@ -1,0 +1,112 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+
+    <body>
+
+        <ui:composition template="./menu.xhtml">
+            <ui:define name="content">
+                <br/>
+                <br/>
+                <p:growl id="msgs" life="3000" />
+                <h:form id="form">
+                    <p:accordionPanel id="acoordtabCli">
+                        <p:tab title="Persona que retira el equipo.">
+                            <h:panelGrid columns="4" cellpadding="10">
+                                <h:outputLabel for="patter" value="Buscar por:"/>
+                                <p:selectOneMenu id="patter" required="false" value="#{prestamoBean.patterCli}">
+                                    <f:selectItem itemLabel="Seleccionar" itemValue="" noSelectionOption="true"/>
+                                    <f:selectItems value="#{prestamoBean.itemsCli}"/>
+                                </p:selectOneMenu>
+                                <p:inputText id="findPatter" required="fasle" value="#{prestamoBean.dataCli}"/>
+                                <p:commandButton value="Buscar" id="btnPatterCli" update=":msgs , :form:acoordtabCli:panelCli , :form:acoordtabCli:btnPatterCli"
+                                                 actionListener="#{prestamoBean.FindClient(event)}"/>
+                            </h:panelGrid>
+                            <p:panel id="panelCli" header="Datos Cliente">
+                                <h:panelGrid  columns="4" cellpadding="10">
+                                    <h:outputText value="Id Banner:"/>
+                                    <h:outputText value="#{prestamoBean.findCli.idBanner}"/>
+                                    <h:outputText value="Cedula:"/>
+                                    <h:outputText value="#{prestamoBean.findCli.cedula}"/>
+                                    <h:outputText value="Nombres:"/>
+                                    <h:outputText value="#{prestamoBean.findCli.nombres}"/>
+                                    <h:outputText value="Apellidos:"/>
+                                    <h:outputText value="#{prestamoBean.findCli.apellidos}"/> 
+                                    <h:outputText value="E-mail:"/>
+                                    <h:outputText value="#{prestamoBean.findCli.email}"/>
+                                    <h:outputText value="Campus"/>
+                                    <h:outputText value="#{prestamoBean.findCli.campus}"/>
+                                    <h:outputLabel for="cliMovil" value="Movil:"/>
+                                    <p:inputText id="cliMovil" required="false" value="#{prestamoBean.newPrstm.dztuscli.dztuscliMovilCli}"/>
+                                </h:panelGrid>
+                            </p:panel>
+                        </p:tab>
+                        <p:tab title="Equipo Solicitado">
+                            <h:panelGrid columns="4" cellpadding="10">
+                                <h:outputLabel for="patterEqp" value="Buscar por:"/>
+                                <p:selectOneMenu id="patterEqp" required="false" value="#{prestamoBean.patterEqp}">
+                                    <f:selectItem itemLabel="Seleccionar" itemValue="" noSelectionOption="true"/>
+                                    <f:selectItems value="#{prestamoBean.itemsEqp}"/>
+                                </p:selectOneMenu>
+                                <p:inputText id="findPatterEqp" required="fasle" value="#{prestamoBean.dataEqp}"/>
+                                <p:commandButton value="Buscar" id="btnPatterEqp" update=":msgs , :form:acoordtabCli:panelEqp , :form:acoordtabCli:btnPatterEqp"
+                                                 actionListener="#{prestamoBean.FindEquipo(event)}"/>
+                            </h:panelGrid>
+                            <p:panel id="panelEqp" header="Datos Equipo">
+                                <h:panelGrid columns="6" cellpadding="10">
+                                    <h:outputText value="Descripción:"/>
+                                    <h:outputText value="#{prestamoBean.findactivo.descripcion}"/>
+                                    <h:outputText value="Marca:"/>
+                                    <h:outputText value="#{prestamoBean.findactivo.marca}"/>
+                                    <h:outputText value="Modelo:"/>
+                                    <h:outputText value="#{prestamoBean.findactivo.modelo}"/>
+                                    <h:outputText value="Serie:"/>
+                                    <h:outputText value="#{prestamoBean.findactivo.nserie}"/> 
+                                    <h:outputText value="Estado:"/>
+                                    <h:outputText value="#{prestamoBean.findactivo.estado}"/>
+                                    <h:outputText value="Observación"/>
+                                    <h:outputText value="#{prestamoBean.findactivo.observacion}"/>
+                                    <h:outputText value="Sucursal:"/>
+                                    <h:outputText value="#{prestamoBean.findactivo.sucursal}"/>
+                                </h:panelGrid>
+                            </p:panel>
+                        </p:tab>
+                        <p:tab title="Detalle del prestamo">
+                            <h:panelGrid columns="4" cellpadding="10">
+                                <h:outputText value="Autorizado por:"/>
+                                <h:outputText value="#{prestamoBean.usuarioId.apellidos} #{prestamoBean.usuarioId.nombres}"/>
+                                <h:outputText value="Campus:"/>
+                                <h:outputText value="#{prestamoBean.usuarioId.campus}"/>
+                                <h:outputText value="ID ESPE:"/>
+                                <h:outputText value="#{prestamoBean.usuarioId.idBanner}"/>
+                                <h:outputText value="Cedula:"/>
+                                <h:outputText value="#{prestamoBean.usuarioId.cedula}"/>
+                            </h:panelGrid>
+                            <p:panel id="panelPrstm" header="Datos Prestamo">
+                                <h:panelGrid columns="4" cellpadding="10">
+                                    <h:outputText value="Fecha de Salida:" />
+                                    <p:clock />
+                                    <h:outputText value="Fecha Posible Retorno:"/>
+                                    <p:calendar id="datetime" value="#{prestamoBean.newPrstm.dztprstFechaPos}" pattern="MM/dd/yyyy HH:mm:ss a" />
+                                    <h:outputText value="Destino:"/>
+                                    <p:inputText id="prstmDestino" required="false" value="#{prestamoBean.newPrstm.dztprstDestino}"/>
+                                    <h:outputText value="Observación:"/>
+                                    <p:inputText id="prstmObserva" required="false" value="#{prestamoBean.newPrstm.dztprstObservacion}"/>
+                                </h:panelGrid>
+                                <f:facet name="footer">
+                                    <p:commandButton value="Generar" id="btnNewPrstm"  update=":msgs , :form:acoordtabCli:panelPrstm , :form:acoordtabCli:btnNewPrstm"
+                                                     actionListener="#{prestamoBean.GeneratePrestamo(event)}"/>
+                                </f:facet>
+                            </p:panel>
+                        </p:tab>
+                    </p:accordionPanel>
+                </h:form>
+            </ui:define>
+        </ui:composition>
+
+    </body>
+</html>
