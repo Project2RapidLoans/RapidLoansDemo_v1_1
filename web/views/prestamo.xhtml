@@ -12,7 +12,7 @@
             <ui:define name="content">
                 <br/>
                 <br/>
-                <p:growl id="msgs" life="3000" />
+                <p:growl id="msgs" showDetail="true" life="5000" />
                 <h:form id="form">
                     <p:accordionPanel id="acoordtabCli">
                         <p:tab title="Persona que retira el equipo.">
@@ -23,7 +23,7 @@
                                     <f:selectItems value="#{prestamoBean.itemsCli}"/>
                                 </p:selectOneMenu>
                                 <p:inputText id="findPatter" required="fasle" value="#{prestamoBean.dataCli}"/>
-                                <p:commandButton value="Buscar" id="btnPatterCli" update=":msgs , :form:acoordtabCli:panelCli , :form:acoordtabCli:btnPatterCli"
+                                <p:commandButton value="Buscar" id="btnPatterCli" update=":msgs , :form:acoordtabCli:panelCli"
                                                  actionListener="#{prestamoBean.FindClient(event)}"/>
                             </h:panelGrid>
                             <p:panel id="panelCli" header="Datos Cliente">
@@ -41,7 +41,7 @@
                                     <h:outputText value="Campus"/>
                                     <h:outputText value="#{prestamoBean.findCli.campus}"/>
                                     <h:outputLabel for="cliMovil" value="Movil:"/>
-                                    <p:inputText id="cliMovil" required="false" value="#{prestamoBean.newPrstm.dztuscli.dztuscliMovilCli}"/>
+                                    <p:inputText id="cliMovil" required="false" value="#{prestamoBean.newPrstm.dztcli.dztcliMovil}"/>
                                 </h:panelGrid>
                             </p:panel>
                         </p:tab>
@@ -53,7 +53,7 @@
                                     <f:selectItems value="#{prestamoBean.itemsEqp}"/>
                                 </p:selectOneMenu>
                                 <p:inputText id="findPatterEqp" required="fasle" value="#{prestamoBean.dataEqp}"/>
-                                <p:commandButton value="Buscar" id="btnPatterEqp" update=":msgs , :form:acoordtabCli:panelEqp , :form:acoordtabCli:btnPatterEqp"
+                                <p:commandButton value="Buscar" id="btnPatterEqp" update=":msgs , :form:acoordtabCli:panelEqp"
                                                  actionListener="#{prestamoBean.FindEquipo(event)}"/>
                             </h:panelGrid>
                             <p:panel id="panelEqp" header="Datos Equipo">
@@ -91,14 +91,14 @@
                                     <h:outputText value="Fecha de Salida:" />
                                     <p:clock />
                                     <h:outputText value="Fecha Posible Retorno:"/>
-                                    <p:calendar id="datetime" value="#{prestamoBean.newPrstm.dztprstFechaPos}" pattern="MM/dd/yyyy HH:mm:ss a" />
+                                    <p:calendar id="datetime" value="#{prestamoBean.newPrstm.dztprstFechaPos}" pattern="MM/dd/yyyy HH:mm:ss" />
                                     <h:outputText value="Destino:"/>
                                     <p:inputText id="prstmDestino" required="false" value="#{prestamoBean.newPrstm.dztprstDestino}"/>
                                     <h:outputText value="Observación:"/>
                                     <p:inputText id="prstmObserva" required="false" value="#{prestamoBean.newPrstm.dztprstObservacion}"/>
                                 </h:panelGrid>
                                 <f:facet name="footer">
-                                    <p:commandButton value="Generar" id="btnNewPrstm"  update=":msgs , :form:acoordtabCli:panelPrstm , :form:acoordtabCli:btnNewPrstm"
+                                    <p:commandButton value="Generar" id="btnNewPrstm"  update=":msgs , :form , :form:acoordtabCli"
                                                      actionListener="#{prestamoBean.GeneratePrestamo(event)}"/>
                                 </f:facet>
                             </p:panel>

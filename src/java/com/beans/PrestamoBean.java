@@ -5,18 +5,9 @@
  */
 package com.beans;
 
-import com.crud.BannerMethos;
-import com.crud.Olympo8iMethods;
-import static com.crud.RapidLoansCrud.findEquipoByTp_St_Cl_Cod;
-import static com.crud.RapidLoansCrud.findUsuarioClienteByIdBanners;
-import com.crud.RapidLoansMethods;
-import com.map.AfActivofijo;
-import com.map.Dzteqp;
-import com.map.Dztprst;
-import com.map.Dztuscli;
-import com.map.PersonaBanner;
+import com.crud.*;
+import com.map.*;
 import java.util.ArrayList;
-import java.util.Date;
 import javax.faces.application.FacesMessage;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
@@ -41,25 +32,36 @@ public class PrestamoBean {
     private String dataEqp;
     private String dataCli;
     private Dztprst newPrstm;
-    private AfActivofijo findactivo;
+    private AfActivofijo findequipo;
     private PersonaBanner findCli;
     private PersonaBanner usuarioId;
     private ArrayList<SelectItem> ItemsCli;
     private ArrayList<SelectItem> ItemsEqp;
 
     public PrestamoBean() {
-        if (this.newPrstm == null || this.findactivo == null || this.findCli == null) {
+        this.init();
+        if (this.newPrstm == null
+                || this.findequipo == null
+                || this.findCli == null) {
             this.newPrstm = new Dztprst();
-            this.findactivo = new AfActivofijo();
+            this.findequipo = new AfActivofijo();
             this.findCli = new PersonaBanner();
         }
+    }
+
+    private void init() {
+        this.newPrstm = new Dztprst();
+        this.findequipo = new AfActivofijo();
         this.findCli = new PersonaBanner();
-        this.findactivo = new AfActivofijo();
         this.ItemsCli = new ArrayList<SelectItem>();
         this.ItemsEqp = new ArrayList<SelectItem>();
+        this.usuarioId = this.getUserInfo();
+        this.dataCli = "";
+        this.dataEqp = "";
+        this.patterCli = "";
+        this.patterEqp = "";
         this.loadItemsCli();
         this.loadItemsEqp();
-        this.usuarioId = this.getUserInfo();
     }
 
     public void FindClient(ActionEvent event) {
@@ -76,64 +78,140 @@ public class PrestamoBean {
     public void FindEquipo(ActionEvent event) {
 
         if (this.getPatterEqp().equals("Codigo")) {
-            this.findactivo = Olympo8iMethods.FindActivoByCodigo(this.dataEqp);
+            this.findequipo = Olympo8iMethods.FindActivoByCodigo(this.dataEqp);
         } else if (this.getPatterCli().equals("Serie")) {
-            //this.findactivo = Olympo8iMethods.FindActivoByCodigo("", "", "", "");
+            //this.findequipo = Olympo8iMethods.FindActivoByCodigo("", "", "", "");
         }
     }
 
-    public void getDataPrestamo() {
+    public Boolean getDataCliente() {
 
-        if (this.findCli != null && this.findactivo != null && this.usuarioId != null) {
-            this.newPrstm.getDzteqp().setDzteqpTipo(this.findactivo.getId().getTipo());
-            this.newPrstm.getDzteqp().setDzteqpSubtipo(this.findactivo.getId().getSubtipo());
-            this.newPrstm.getDzteqp().setDzteqpClase(this.findactivo.getId().getClase());
-            this.newPrstm.getDzteqp().setDzteqpCodigo(this.findactivo.getId().getCodigo());
-            this.newPrstm.getDzteqp().setDzteqpDescripcion(this.findactivo.getDescripcion());
-            this.newPrstm.getDzteqp().setDzteqpMarca(this.findactivo.getMarca());
-            this.newPrstm.getDzteqp().setDzteqpModelo(this.findactivo.getModelo());
-            this.newPrstm.getDzteqp().setDzteqpSerie(this.findactivo.getNserie());
-            this.newPrstm.getDzteqp().setDzteqpEstado(this.findactivo.getEstado());
-            this.newPrstm.getDzteqp().setDzteqpUbicacion(this.findactivo.getSucursal());
-            this.newPrstm.getDzteqp().setDzteqpCampus(this.findactivo.getDescDireccion());
-            this.newPrstm.getDzteqp().setDzteqpEstadoAc(this.findactivo.getEstado());
-            this.newPrstm.getDzteqp().setDzteqpCustodios(this.findactivo.getCustodio1() + "-" + this.findactivo.getCustodio2());
-            this.newPrstm.getDzteqp().setDzteqpCodBien(this.findactivo.getCodBien());
-            this.newPrstm.getDzteqp().setDzteqpObservacion(this.findactivo.getObservacion());
-
-            this.newPrstm.getDztuscli().setDztuscliCampus(this.usuarioId.getCampus());
-            this.newPrstm.getDztuscli().setDztuscliCedulaUs(this.usuarioId.getCedula());
-            this.newPrstm.getDztuscli().setDztuscliIdbannerUs(this.usuarioId.getIdBanner());
-            this.newPrstm.getDztuscli().setDztuscliCedulaCli(this.findCli.getCedula());
-            this.newPrstm.getDztuscli().setDztuscliIdbannerCli(this.findCli.getIdBanner());
-
-            this.newPrstm.setDztprstFechaIn(new Date());
-            this.newPrstm.setDztprstFechaOut(new Date());
-            this.newPrstm.setDztprstUnqcod("123456789");
-
+        Boolean exito = false;
+        this.newPrstm.getDztcli().
+                setDztcliCedula(this.findCli.getCedula());
+        this.newPrstm.getDztcli().
+                setDztcliEmail(this.findCli.getEmail());
+        this.newPrstm.getDztcli().
+                setDztcliIdbanner(this.findCli.getIdBanner());
+        if (RapidLoansMethods.
+                FindCliente(this.newPrstm.getDztcli()) != null) {
+            this.newPrstm.getDztcli().
+                    setDztcliId(RapidLoansMethods.
+                            FindCliente(this.newPrstm.getDztcli()).getDztcliId());
+            exito = RapidLoansMethods.UpdateCliente(this.newPrstm.getDztcli());
+        } else {
+            exito = RapidLoansMethods.InsertCliente(this.newPrstm.getDztcli());
         }
 
+        return exito;
+    }
+
+    public Boolean getDataUsuario() {
+
+        Boolean exito = false;
+        this.newPrstm.getDztus().
+                setDztusCampus(this.usuarioId.getCampus());
+        this.newPrstm.getDztus().
+                setDztusCedula(this.usuarioId.getCedula());
+        this.newPrstm.getDztus().
+                setDztusEmail(this.usuarioId.getEmail());
+        this.newPrstm.getDztus().
+                setDztusIdbanner(this.usuarioId.getIdBanner());
+        if (RapidLoansMethods.
+                FindUsuario(this.newPrstm.getDztus()) != null) {
+            this.newPrstm.getDztus().
+                    setDztusId(RapidLoansMethods.
+                            FindUsuario(this.newPrstm.getDztus()).getDztusId());
+            exito = RapidLoansMethods.UpdateUsuario(this.newPrstm.getDztus());
+        } else {
+            exito = RapidLoansMethods.InsertUsuario(this.newPrstm.getDztus());
+        }
+        return exito;
+    }
+
+    public Boolean getDataEquipo() {
+
+        Boolean exito = false;
+        this.newPrstm.getDzteqp().
+                setDzteqpTipo(this.findequipo.getId().getTipo());
+        this.newPrstm.getDzteqp().
+                setDzteqpSubtipo(this.findequipo.getId().getSubtipo());
+        this.newPrstm.getDzteqp().
+                setDzteqpClase(this.findequipo.getId().getClase());
+        this.newPrstm.getDzteqp().
+                setDzteqpCodigo(this.findequipo.getId().getCodigo());
+        this.newPrstm.getDzteqp().
+                setDzteqpDescripcion(this.findequipo.getDescripcion());
+        this.newPrstm.getDzteqp().
+                setDzteqpMarca(this.findequipo.getMarca());
+        this.newPrstm.getDzteqp().
+                setDzteqpModelo(this.findequipo.getModelo());
+        this.newPrstm.getDzteqp().
+                setDzteqpSerie(this.findequipo.getNserie());
+        this.newPrstm.getDzteqp().
+                setDzteqpEstado(this.findequipo.getEstado());
+        this.newPrstm.getDzteqp().
+                setDzteqpUbicacion(this.findequipo.getSucursal());
+        this.newPrstm.getDzteqp().
+                setDzteqpCampus(this.findequipo.getDescDireccion());
+        this.newPrstm.getDzteqp().
+                setDzteqpEstadoAc(this.findequipo.getEstado());
+        this.newPrstm.getDzteqp().
+                setDzteqpCustodio1(this.findequipo.getCustodio1());
+        this.newPrstm.getDzteqp().
+                setDzteqpCustodio2(this.findequipo.getCustodio2());
+        this.newPrstm.getDzteqp().
+                setDzteqpCodBien(this.findequipo.getCodBien());
+        this.newPrstm.getDzteqp().
+                setDzteqpObservacion(this.findequipo.getObservacion());
+        this.newPrstm.getDzteqp().
+                setDzteqpFlag(RapidLoansMethods.$EQP_HABILITADO);
+        if (RapidLoansMethods.
+                FindEquipoByTp_St_Cl_Cod(this.newPrstm.getDzteqp()) != null) {
+            this.newPrstm.getDzteqp().
+                    setDzteqpId(RapidLoansMethods.
+                            FindEquipoByTp_St_Cl_Cod(this.newPrstm.getDzteqp()).getDzteqpId());
+            exito = RapidLoansMethods.UpdateEquipo(this.newPrstm.getDzteqp());
+        } else {
+            exito = RapidLoansMethods.InsertEquipo(this.newPrstm.getDzteqp());
+        }
+        return exito;
+    }
+
+    public Boolean getDataPrestamo() {
+
+        Boolean exito = false;
+        this.newPrstm.getDzteqp().
+                setDzteqpId(RapidLoansMethods.
+                        FindEquipoByTp_St_Cl_Cod(
+                                this.newPrstm.getDzteqp()).getDzteqpId());
+        this.newPrstm.getDztcli().
+                setDztcliId(RapidLoansMethods.
+                        FindCliente(this.newPrstm.getDztcli()).getDztcliId());
+        this.newPrstm.getDztus().
+                setDztusId(RapidLoansMethods.
+                        FindUsuario(this.newPrstm.getDztus()).getDztusId());
+        this.newPrstm.setDztprstFechaOut(
+                RapidLoansMethods.getDateUpdate());
+        this.newPrstm.
+                setDztprstUnqcod(RapidLoansMethods.
+                        getUnqCode(this.newPrstm));
+        this.newPrstm.setDztprstFlag(RapidLoansMethods.$PRST_ABIERTO);
+
+        exito = RapidLoansMethods.InsertPrestamo(this.newPrstm);
+        return exito;
     }
 
     public void GeneratePrestamo(ActionEvent event) {
 
-        /**
-         * Observacion, destino y movil
-         */
         FacesMessage message = null;
-        this.getDataPrestamo();
-        Boolean ex2 = RapidLoansMethods.InsertUsuarioCliente(this.newPrstm.getDztuscli());
-        Boolean ex3 = RapidLoansMethods.InsertActivo(this.newPrstm.getDzteqp());
-        Dzteqp eqpnew = findEquipoByTp_St_Cl_Cod(this.newPrstm.getDzteqp());
-        Dztuscli usclinew = findUsuarioClienteByIdBanners(this.newPrstm.getDztuscli());
-        this.newPrstm.getId().setDzteqpId(eqpnew.getDzteqpId());
-        this.newPrstm.getId().setDztuscliId(usclinew.getDztuscliId());
-        int count = RapidLoansMethods.CountPrestamoById(this.newPrstm);
-        //this.newPrstm.setDztprstUnqcod(""+eqpnew.getDzteqpId()+""+usclinew.getDztuscliId()+""+count);
-        Boolean ex1 = RapidLoansMethods.InsertPrestamo(this.newPrstm);
-
-        if (ex1 && ex2 && ex3) {
+        Boolean exito = this.getDataCliente()
+                && this.getDataUsuario()
+                && this.getDataEquipo()
+                && this.getDataPrestamo();
+        if (exito) {
             message = new FacesMessage(FacesMessage.SEVERITY_INFO, "Se ha guardado exitosamente", "");
+            this.init();
         } else {
             message = new FacesMessage(FacesMessage.SEVERITY_WARN, "No se ha guardado", "");
         }
@@ -159,6 +237,7 @@ public class PrestamoBean {
         selectItemsCli.add("Id Banner");
         selectItemsCli.add("Cedula");
         selectItemsCli.add("Movil");
+        this.ItemsCli.clear();
         for (String Item : selectItemsCli) {
             this.ItemsCli.add(new SelectItem(Item, Item));
         }
@@ -168,6 +247,7 @@ public class PrestamoBean {
         ArrayList<String> selectItemsEqp = new ArrayList<String>();
         selectItemsEqp.add("Codigo");
         selectItemsEqp.add("Serie");
+        this.ItemsEqp.clear();
         for (String Item : selectItemsEqp) {
             this.ItemsEqp.add(new SelectItem(Item, Item));
         }
@@ -244,17 +324,17 @@ public class PrestamoBean {
     }
 
     /**
-     * @return the findactivo
+     * @return the findequipo
      */
     public AfActivofijo getFindactivo() {
-        return findactivo;
+        return findequipo;
     }
 
     /**
-     * @param findactivo the findactivo to set
+     * @param findequipo the findequipo to set
      */
-    public void setFindactivo(AfActivofijo findactivo) {
-        this.findactivo = findactivo;
+    public void setFindactivo(AfActivofijo findequipo) {
+        this.findequipo = findequipo;
     }
 
     /**
