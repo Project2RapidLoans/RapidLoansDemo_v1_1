@@ -9,6 +9,7 @@ import com.crud.*;
 import com.map.*;
 import java.util.ArrayList;
 import javax.faces.application.FacesMessage;
+import javax.faces.application.FacesMessage.Severity;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
@@ -69,19 +70,42 @@ public class PrestamoBean {
         if (this.getPatterCli().equals("Id Banner")) {
             this.findCli = BannerMethos.FindPersonBannerByIdBanner(this.dataCli);
         } else if (this.getPatterCli().equals("Cedula")) {
-            this.findCli = BannerMethos.FindPersonBannerByCdula(this.dataCli);
+            this.findCli = BannerMethos.FindPersonBannerByCedula(this.dataCli);
         } else if (this.getPatterCli().equals("Movil")) {
 
+        } else {
+            generateMessage(FacesMessage.SEVERITY_INFO, "Por favor", "Seleciona un campo.");
         }
     }
 
     public void FindEquipo(ActionEvent event) {
 
         if (this.getPatterEqp().equals("Codigo")) {
-            this.findequipo = Olympo8iMethods.FindActivoByCodigo(this.dataEqp);
+            if (!ValidateEquipoCustodio(this.dataEqp)) {
+                generateMessage(FacesMessage.SEVERITY_WARN, "Advertencia", "Usted no esta autorizado a prestar este Equipo o Bien.");
+                this.findequipo = new AfActivofijo();
+            }
         } else if (this.getPatterCli().equals("Serie")) {
             //this.findequipo = Olympo8iMethods.FindActivoByCodigo("", "", "", "");
+        } else {
+            generateMessage(FacesMessage.SEVERITY_INFO, "Por favor", "Seleciona un campo.");
         }
+    }
+
+    private Boolean ValidateEquipoCustodio(String dataEqp) {
+        Boolean exito = false;
+        AfActivofijo eqp = Olympo8iMethods.FindActivoByCustodio_CodBien(this.usuarioId.getCedula(), dataEqp);
+        if (eqp != null) {
+            this.findequipo = eqp;
+            exito = true;
+        }
+        return exito;
+    }
+
+    public void generateMessage(Severity Tipo, String Header, String Mensaje) {
+        FacesMessage message = new FacesMessage(Tipo, Header, Mensaje);
+        FacesContext.getCurrentInstance().addMessage(null, message);
+
     }
 
     public Boolean getDataCliente() {
@@ -122,7 +146,6 @@ public class PrestamoBean {
             this.newPrstm.getDztus().
                     setDztusId(RapidLoansMethods.
                             FindUsuario(this.newPrstm.getDztus()).getDztusId());
-            exito = RapidLoansMethods.UpdateUsuario(this.newPrstm.getDztus());
         } else {
             exito = RapidLoansMethods.InsertUsuario(this.newPrstm.getDztus());
         }
@@ -156,10 +179,6 @@ public class PrestamoBean {
                 setDzteqpCampus(this.findequipo.getDescDireccion());
         this.newPrstm.getDzteqp().
                 setDzteqpEstadoAc(this.findequipo.getEstado());
-        this.newPrstm.getDzteqp().
-                setDzteqpCustodio1(this.findequipo.getCustodio1());
-        this.newPrstm.getDzteqp().
-                setDzteqpCustodio2(this.findequipo.getCustodio2());
         this.newPrstm.getDzteqp().
                 setDzteqpCodBien(this.findequipo.getCodBien());
         this.newPrstm.getDzteqp().
