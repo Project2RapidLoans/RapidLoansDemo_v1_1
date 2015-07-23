@@ -8,6 +8,7 @@ package com.beans;
 import com.crud.*;
 import com.map.*;
 import java.util.ArrayList;
+import java.util.Date;
 import javax.faces.application.FacesMessage;
 import javax.faces.application.FacesMessage.Severity;
 import javax.faces.bean.ManagedBean;
@@ -15,7 +16,9 @@ import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.faces.model.SelectItem;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
+import rapidloans.xml.server.DztprstXML;
 
 /**
  *
@@ -36,6 +39,7 @@ public class PrestamoBean {
     private AfActivofijo findequipo;
     private PersonaBanner findCli;
     private PersonaBanner usuarioId;
+    private Date DztprstFechaPos;
     private ArrayList<SelectItem> ItemsCli;
     private ArrayList<SelectItem> ItemsEqp;
 
@@ -108,9 +112,8 @@ public class PrestamoBean {
 
     }
 
-    public Boolean getDataCliente() {
+    public void getDataCliente() {
 
-        Boolean exito = false;
         this.newPrstm.getDztcli().
                 setDztcliCedula(this.findCli.getCedula());
         this.newPrstm.getDztcli().
@@ -122,17 +125,14 @@ public class PrestamoBean {
             this.newPrstm.getDztcli().
                     setDztcliId(RapidLoansMethods.
                             FindCliente(this.newPrstm.getDztcli()).getDztcliId());
-            exito = RapidLoansMethods.UpdateCliente(this.newPrstm.getDztcli());
+            RapidLoansMethods.UpdateCliente(this.newPrstm.getDztcli());
         } else {
-            exito = RapidLoansMethods.InsertCliente(this.newPrstm.getDztcli());
+            RapidLoansMethods.InsertCliente(this.newPrstm.getDztcli());
         }
-
-        return exito;
     }
 
-    public Boolean getDataUsuario() {
+    public void getDataUsuario() {
 
-        Boolean exito = false;
         this.newPrstm.getDztus().
                 setDztusCampus(this.usuarioId.getCampus());
         this.newPrstm.getDztus().
@@ -147,14 +147,12 @@ public class PrestamoBean {
                     setDztusId(RapidLoansMethods.
                             FindUsuario(this.newPrstm.getDztus()).getDztusId());
         } else {
-            exito = RapidLoansMethods.InsertUsuario(this.newPrstm.getDztus());
+            RapidLoansMethods.InsertUsuario(this.newPrstm.getDztus());
         }
-        return exito;
     }
 
-    public Boolean getDataEquipo() {
+    public void getDataEquipo() {
 
-        Boolean exito = false;
         this.newPrstm.getDzteqp().
                 setDzteqpTipo(this.findequipo.getId().getTipo());
         this.newPrstm.getDzteqp().
@@ -185,21 +183,24 @@ public class PrestamoBean {
                 setDzteqpObservacion(this.findequipo.getObservacion());
         this.newPrstm.getDzteqp().
                 setDzteqpFlag(RapidLoansMethods.$EQP_HABILITADO);
+        this.newPrstm.getDzteqp().getDztus().
+                setDztusId(RapidLoansMethods.
+                        FindUsuario(this.newPrstm.getDztus()).getDztusId());
         if (RapidLoansMethods.
                 FindEquipoByTp_St_Cl_Cod(this.newPrstm.getDzteqp()) != null) {
             this.newPrstm.getDzteqp().
                     setDzteqpId(RapidLoansMethods.
                             FindEquipoByTp_St_Cl_Cod(this.newPrstm.getDzteqp()).getDzteqpId());
-            exito = RapidLoansMethods.UpdateEquipo(this.newPrstm.getDzteqp());
+            RapidLoansMethods.UpdateEquipo(this.newPrstm.getDzteqp());
         } else {
-            exito = RapidLoansMethods.InsertEquipo(this.newPrstm.getDzteqp());
+            RapidLoansMethods.InsertEquipo(this.newPrstm.getDzteqp());
         }
-        return exito;
+
     }
 
     public Boolean getDataPrestamo() {
 
-        Boolean exito = false;
+        Boolean exito = true;
         this.newPrstm.getDzteqp().
                 setDzteqpId(RapidLoansMethods.
                         FindEquipoByTp_St_Cl_Cod(
@@ -212,23 +213,31 @@ public class PrestamoBean {
                         FindUsuario(this.newPrstm.getDztus()).getDztusId());
         this.newPrstm.setDztprstFechaOut(
                 RapidLoansMethods.getDateUpdate());
+        this.newPrstm.setDztprstFechaPos(
+                RapidLoansMethods.getDateToString(this.DztprstFechaPos));
         this.newPrstm.
                 setDztprstUnqcod(RapidLoansMethods.
                         getUnqCode(this.newPrstm));
         this.newPrstm.setDztprstFlag(RapidLoansMethods.$PRST_ABIERTO);
 
         exito = RapidLoansMethods.InsertPrestamo(this.newPrstm);
+        if (exito) {
+            this.newPrstm.setDztprstId(
+                    RapidLoansMethods.
+                    FindPrestamoByUnqCode(newPrstm).getDztprstId());
+        }
         return exito;
     }
 
     public void GeneratePrestamo(ActionEvent event) {
 
         FacesMessage message = null;
-        Boolean exito = this.getDataCliente()
-                && this.getDataUsuario()
-                && this.getDataEquipo()
-                && this.getDataPrestamo();
+        this.getDataCliente();
+        this.getDataUsuario();
+        this.getDataEquipo();
+        Boolean exito = this.getDataPrestamo();
         if (exito) {
+            String pathXML = new DztprstXML().generateXML(this.newPrstm, "E:\\PruebasXML");
             message = new FacesMessage(FacesMessage.SEVERITY_INFO, "Se ha guardado exitosamente", "");
             this.init();
         } else {
@@ -236,6 +245,25 @@ public class PrestamoBean {
         }
         FacesContext.getCurrentInstance().addMessage(null, message);
 
+    }
+    
+    public void generatePDF(){
+        Boolean successHTML = false;
+            Boolean successPDF = false;
+
+            String xmlPath = "";
+            String htmlPath = "";
+            String pdfPath = "";
+            String serverPath = "";
+
+            ServletContext ctx = (ServletContext) FacesContext.getCurrentInstance()
+                    .getExternalContext().getContext();
+            serverPath = ctx.getRealPath("/");
+            String fileName = "WEB-INF/ride/" + this.newPrstm.getDztprstUnqcod();
+            // obtener y escribir el XML
+            xmlPath = fileName + ".xml";
+            htmlPath = fileName + ".html";
+            pdfPath = fileName + ".pdf";
     }
 
     private PersonaBanner getUserInfo() {
@@ -410,6 +438,20 @@ public class PrestamoBean {
      */
     public void setUsuarioId(PersonaBanner usuarioId) {
         this.usuarioId = usuarioId;
+    }
+
+    /**
+     * @return the DztprstFechaPos
+     */
+    public Date getDztprstFechaPos() {
+        return DztprstFechaPos;
+    }
+
+    /**
+     * @param DztprstFechaPos the DztprstFechaPos to set
+     */
+    public void setDztprstFechaPos(Date DztprstFechaPos) {
+        this.DztprstFechaPos = DztprstFechaPos;
     }
 
 }
