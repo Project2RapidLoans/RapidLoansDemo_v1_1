@@ -5,8 +5,8 @@
  */
 package com.beans;
 
-import com.crud.BannerMethos;
-import com.map.PersonaBanner;
+import banner.crud.BannerMethos;
+import banner.map.PersonaBanner;
 import com.web.RapidLoansUtil;
 import java.awt.event.ActionEvent;
 import javax.faces.application.FacesMessage;

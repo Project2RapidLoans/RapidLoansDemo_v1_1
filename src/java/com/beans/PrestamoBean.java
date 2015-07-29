@@ -5,8 +5,8 @@
  */
 package com.beans;
 
-import com.crud.*;
-import com.map.*;
+import banner.crud.BannerMethos;
+import banner.map.PersonaBanner;
 import java.util.ArrayList;
 import java.util.Date;
 import javax.faces.application.FacesMessage;
@@ -18,7 +18,10 @@ import javax.faces.event.ActionEvent;
 import javax.faces.model.SelectItem;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
-import rapidloans.xml.server.DztprstXML;
+import olympo.crud.Olympo8iMethods;
+import olympo.map.AfActivofijo;
+import rapidloans.crud.RapidLoansMethods;
+import rapidloans.map.Dztprst;
 
 /**
  *
@@ -115,6 +118,8 @@ public class PrestamoBean {
     public void getDataCliente() {
 
         this.newPrstm.getDztcli().
+                setDztcliNombre(this.findCli.getNombres()+this.findCli.getApellidos());
+        this.newPrstm.getDztcli().
                 setDztcliCedula(this.findCli.getCedula());
         this.newPrstm.getDztcli().
                 setDztcliEmail(this.findCli.getEmail());
@@ -134,7 +139,7 @@ public class PrestamoBean {
     public void getDataUsuario() {
 
         this.newPrstm.getDztus().
-                setDztusCampus(this.usuarioId.getCampus());
+                setDztusNombre(this.usuarioId.getNombres() + this.usuarioId.getApellidos());
         this.newPrstm.getDztus().
                 setDztusCedula(this.usuarioId.getCedula());
         this.newPrstm.getDztus().
@@ -237,7 +242,7 @@ public class PrestamoBean {
         this.getDataEquipo();
         Boolean exito = this.getDataPrestamo();
         if (exito) {
-            String pathXML = new DztprstXML().generateXML(this.newPrstm, "E:\\PruebasXML");
+
             message = new FacesMessage(FacesMessage.SEVERITY_INFO, "Se ha guardado exitosamente", "");
             this.init();
         } else {
@@ -246,24 +251,24 @@ public class PrestamoBean {
         FacesContext.getCurrentInstance().addMessage(null, message);
 
     }
-    
-    public void generatePDF(){
+
+    public void generatePDF() {
         Boolean successHTML = false;
-            Boolean successPDF = false;
+        Boolean successPDF = false;
 
-            String xmlPath = "";
-            String htmlPath = "";
-            String pdfPath = "";
-            String serverPath = "";
+        String xmlPath = "";
+        String htmlPath = "";
+        String pdfPath = "";
+        String serverPath = "";
 
-            ServletContext ctx = (ServletContext) FacesContext.getCurrentInstance()
-                    .getExternalContext().getContext();
-            serverPath = ctx.getRealPath("/");
-            String fileName = "WEB-INF/ride/" + this.newPrstm.getDztprstUnqcod();
-            // obtener y escribir el XML
-            xmlPath = fileName + ".xml";
-            htmlPath = fileName + ".html";
-            pdfPath = fileName + ".pdf";
+        ServletContext ctx = (ServletContext) FacesContext.getCurrentInstance()
+                .getExternalContext().getContext();
+        serverPath = ctx.getRealPath("/");
+        String fileName = "WEB-INF/ride/" + this.newPrstm.getDztprstUnqcod();
+        // obtener y escribir el XML
+        xmlPath = fileName + ".xml";
+        htmlPath = fileName + ".html";
+        pdfPath = fileName + ".pdf";
     }
 
     private PersonaBanner getUserInfo() {
