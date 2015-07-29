@@ -7,8 +7,13 @@ package com.beans;
 
 import banner.crud.BannerMethos;
 import banner.map.PersonaBanner;
+import com.logger.L;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.faces.application.FacesMessage;
 import javax.faces.application.FacesMessage.Severity;
 import javax.faces.bean.ManagedBean;
@@ -18,10 +23,15 @@ import javax.faces.event.ActionEvent;
 import javax.faces.model.SelectItem;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpSession;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactoryConfigurationError;
 import olympo.crud.Olympo8iMethods;
 import olympo.map.AfActivofijo;
 import rapidloans.crud.RapidLoansMethods;
 import rapidloans.map.Dztprst;
+import rapidloans.pdf.util.HTMLtoPDF;
+import rapidloans.pdf.util.XMLtoHtml;
+import rapidloans.xml.server.DztprstXML;
 
 /**
  *
@@ -34,6 +44,8 @@ public class PrestamoBean {
     /**
      * Creates a new instance of PrestamoBean
      */
+    private final static L log = new L(PrestamoBean.class);
+
     private String patterCli;
     private String patterEqp;
     private String dataEqp;
@@ -118,7 +130,7 @@ public class PrestamoBean {
     public void getDataCliente() {
 
         this.newPrstm.getDztcli().
-                setDztcliNombre(this.findCli.getNombres()+this.findCli.getApellidos());
+                setDztcliNombre(this.findCli.getNombres() + this.findCli.getApellidos());
         this.newPrstm.getDztcli().
                 setDztcliCedula(this.findCli.getCedula());
         this.newPrstm.getDztcli().
@@ -188,9 +200,6 @@ public class PrestamoBean {
                 setDzteqpObservacion(this.findequipo.getObservacion());
         this.newPrstm.getDzteqp().
                 setDzteqpFlag(RapidLoansMethods.$EQP_HABILITADO);
-        this.newPrstm.getDzteqp().getDztus().
-                setDztusId(RapidLoansMethods.
-                        FindUsuario(this.newPrstm.getDztus()).getDztusId());
         if (RapidLoansMethods.
                 FindEquipoByTp_St_Cl_Cod(this.newPrstm.getDzteqp()) != null) {
             this.newPrstm.getDzteqp().
@@ -205,7 +214,7 @@ public class PrestamoBean {
 
     public Boolean getDataPrestamo() {
 
-        Boolean exito = true;
+        Boolean exito = false;
         this.newPrstm.getDzteqp().
                 setDzteqpId(RapidLoansMethods.
                         FindEquipoByTp_St_Cl_Cod(
@@ -230,6 +239,7 @@ public class PrestamoBean {
             this.newPrstm.setDztprstId(
                     RapidLoansMethods.
                     FindPrestamoByUnqCode(newPrstm).getDztprstId());
+            exito = true;
         }
         return exito;
     }
@@ -242,7 +252,7 @@ public class PrestamoBean {
         this.getDataEquipo();
         Boolean exito = this.getDataPrestamo();
         if (exito) {
-
+            generatePDF();
             message = new FacesMessage(FacesMessage.SEVERITY_INFO, "Se ha guardado exitosamente", "");
             this.init();
         } else {
@@ -253,22 +263,46 @@ public class PrestamoBean {
     }
 
     public void generatePDF() {
-        Boolean successHTML = false;
-        Boolean successPDF = false;
+        if (this.newPrstm != null) {
+            Boolean successHTML = false;
+            Boolean successPDF = false;
 
-        String xmlPath = "";
-        String htmlPath = "";
-        String pdfPath = "";
-        String serverPath = "";
+            String xmlPath = "";
+            String htmlPath = "";
+            String pdfPath = "";
+            String serverPath = "";
 
-        ServletContext ctx = (ServletContext) FacesContext.getCurrentInstance()
-                .getExternalContext().getContext();
-        serverPath = ctx.getRealPath("/");
-        String fileName = "WEB-INF/ride/" + this.newPrstm.getDztprstUnqcod();
-        // obtener y escribir el XML
-        xmlPath = fileName + ".xml";
-        htmlPath = fileName + ".html";
-        pdfPath = fileName + ".pdf";
+            ServletContext ctx = (ServletContext) FacesContext.getCurrentInstance()
+                    .getExternalContext().getContext();
+            serverPath = ctx.getRealPath("/");
+            String fileName = "WEB-INF/cmp/";
+            // obtener y escribir el XML
+            DztprstXML xmlcmp = new DztprstXML();
+            xmlPath = xmlcmp.generateXML(this.newPrstm, serverPath + fileName);
+            htmlPath = xmlPath.replace(".xml", ".html");
+            pdfPath = xmlPath.replace(".xml", ".pdf");
+            DztprstXML.parseFile(new File(xmlPath));
+            try {
+                successHTML = XMLtoHtml.createHTML(serverPath + fileName, htmlPath, xmlPath, this.newPrstm.getDztprstUnqcod());
+            } catch (IOException ex) {
+                log.level.error("IOException: ", ex);
+            } catch (TransformerFactoryConfigurationError ex) {
+                log.level.error("TransformerFactoryConfigurationError: ", ex);
+            } catch (TransformerException ex) {
+                log.level.error("TransformerException: ", ex);
+            } catch (Exception ex) {
+                log.level.error("Exception: ", ex);
+            }
+
+            try {
+                if (successHTML) {
+                    successPDF = HTMLtoPDF.createPDF(htmlPath, pdfPath);
+                }
+            } catch (IOException ex) {
+                log.level.error("IOException: ", ex);
+            }
+
+        }
     }
 
     private PersonaBanner getUserInfo() {
